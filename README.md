@@ -1,2 +1,13 @@
-# mini_projects
-A collection of algorithm-based puzzle solvers including Sudoku, Maze, Sliding Puzzle, and other classic problems implemented using search and backtracking algorithm
+# Mini Projects
+
+Personal mini projects and experiments.
+
+## Projects
+
+| Project | Folder |
+|---|---|
+| Sudoku Solver | `sudoko-solver/` |
+
+## Note
+
+This is a simple personal practice repository.
