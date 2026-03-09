@@ -1,6 +1,19 @@
+from flask import Flask , jsonify , request, send_from_directory
 import requests
-response = requests.get("https://sudoku-api.vercel.app/api/dosuku")
-board = response.json()["newboard"]["grids"][0]["value"]
+import copy
+import os
+
+app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+@app.get("/")
+def home():
+    return send_from_directory(BASE_DIR, "index.html")
+
+def fetch_board():
+    response = requests.get("https://sudoku-api.vercel.app/api/dosuku")
+    return response.json()["newboard"]["grids"][0]["value"]
 '''solve(board):
     find empty cell
     if none → solved
@@ -58,10 +71,26 @@ def print_board(board):
                 print("| ", end="")
             print(board[i][j], end=" ")
         print()
+@app.get("/api/new-board")
+def new_board():
+    board = fetch_board()
+    return jsonify({"board":board})
+
+@app.post("/api/solve")
+def solve_board():
+    data = request.get_json(silent=True) or {}
+    board = data.get("board")
+
+    if not isinstance(board, list) or len(board) !=9:
+        return jsonify({"error": "Invalid board format"}), 400
+    
+    board_copy = copy.deepcopy(board)
+    solved = solve(board_copy)
+    if not solved:
+        return jsonify({"error":"No solution exists"}), 422
+    
+    return jsonify({"solved_board":board_copy})
 
 
-if solve(board):
-    print("\nSolved Sudoku:")
-    print_board(board)
-else:    
-    print("No solution exists")
+if __name__ == "__main__":
+    app.run(debug=True)

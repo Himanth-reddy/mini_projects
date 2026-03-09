@@ -1,0 +1,87 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoko Solver</title>
+</head>
+<style>
+    table, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    }
+    table {
+    margin: 0 auto;
+    }
+    td {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    }
+    .container {
+    justify-content: center;
+    align-items: center;
+    }
+
+</style>
+<body>
+    <h1 style="text-align: center;">
+        Sudoko Solver
+    </h1>
+    <br>
+    <div>
+        <table id = "sudokoTable">
+        </table>
+    </div>
+    <br>
+    <div class="container">    
+        <button  id="solveBtn" >Solve</button>
+    </div>
+
+    <script>
+        
+    let currentBoard = [];
+
+    function renderBoard(data) {
+        const table = document.getElementById("sudokoTable");
+        table.innerHTML = "";
+
+        data.forEach((row) => {
+            const tr = document.createElement("tr");
+
+            row.forEach((value) => {
+                const td = document.createElement("td");
+                td.textContent = value === 0 ? "" : value;
+                tr.appendChild(td);
+            });
+
+            table.appendChild(tr);
+        });
+    }
+
+
+    fetch("/api/new-board")
+        .then((res) => res.json())
+        .then((data) => {
+            currentBoard = data.board.map((row) => [...row]);
+            renderBoard(currentBoard);
+        });
+
+    document.getElementById("solveBtn").addEventListener("click", () => {
+        fetch("/api/solve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ board: currentBoard })
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.solved_board) {
+                    currentBoard = data.solved_board;
+                    renderBoard(currentBoard);
+                } else {
+                    alert(data.error || "Solve failed");
+                }
+            });
+    });
+    </script>
+</body>
+</html>
